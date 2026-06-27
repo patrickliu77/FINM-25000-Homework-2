@@ -1,0 +1,9 @@
+.env
+.venv/
+__pycache__/
+*.py[cod]
+.DS_Store
+.streamlit/secrets.toml
+
+# Course reference material, not part of the submission
+random_strategy_code_walkthrough.html
