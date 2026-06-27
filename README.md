@@ -6,47 +6,59 @@ algorithmic trading strategies, and compares them on a risk-adjusted basis.
 
 ## Current status
 
-Project scaffold. The Streamlit frontend (visual system, layout, charts, and
-the performance table) is being built against the backend contract below. The
-historical data loader, technical indicators, strategy signals, backtesting
-engine, and performance metrics live in the backend modules.
+The Streamlit frontend is complete and runs end to end on a synthetic mock
+service (`frontend/mock_backtest.py`) so the interface, charts, metric cards,
+and comparison table can be built and demoed without the backend. Everything
+shown is mock data for now.
+
+Integration is a one-line import swap: when the backend module
+`backtest_service.py` is ready (a class implementing the `BacktestService`
+contract in `contract.py`), change the marked import in `app.py` and the same
+UI renders live Alpaca results. Look for `BACKEND INTEGRATION POINT` in
+`app.py`.
 
 ## Project structure
 
 ```
-app.py                   Streamlit entry point and page orchestration
-frontend/styles.py       Visual system (CSS) for the terminal interface
-frontend/charts.py       Price, equity-curve, and drawdown chart builders
-frontend/validation.py   Ticker input validation
-.streamlit/config.toml   Local server configuration (port 8512)
-requirements.txt         Python dependencies
+app.py                     Streamlit entry point and page orchestration
+contract.py                Frontend <-> backend contract (shared data types)
+frontend/mock_backtest.py  Synthetic BacktestService used until the backend lands
+frontend/charts.py         Price, equity-curve, and drawdown chart builders
+frontend/styles.py         Visual system (CSS) for the terminal interface
+frontend/validation.py     Ticker input validation
+.streamlit/config.toml     Local server configuration (port 8512)
+requirements.txt           Python dependencies
+backtest_service.py        Real Alpaca-backed service (added by the backend author)
 ```
-
-Backend modules (data loader, indicators, strategies, backtest engine, and
-metrics) are added by the backend author against the contract below.
 
 ## Run the frontend
 
 ```bash
 python -m venv .venv
-.venv\Scripts\activate        # Windows
+.venv\Scripts\activate         # Windows  (use: source .venv/bin/activate on macOS/Linux)
 pip install -r requirements.txt
 streamlit run app.py
 ```
 
 The project is configured to open at `http://localhost:8512`.
 
-## Backend integration contract (draft)
+## Backend integration contract
 
-To be finalized between the frontend and backend authors. The frontend expects
-the backend to provide:
+Defined in `contract.py`. The backend ships a class implementing
+`BacktestService`:
 
-- `load_history(symbol, years=5)` -> a pandas DataFrame of daily OHLCV bars
-  indexed by date with `open`, `high`, `low`, `close`, and `volume` columns.
-- `run_backtest(prices, strategy)` -> per-strategy results containing the
-  portfolio value series (equity curve), daily returns, and the list of trades.
-- `performance_metrics(results)` -> Total Return, CAGR, Volatility, Sharpe,
-  Sortino, Maximum Drawdown, and Win Rate.
+- `available_strategies() -> list[str]` -- strategy display names.
+- `run_backtest(symbol, years=5) -> BacktestReport` -- loads history, runs
+  Buy & Hold plus every strategy, and scores them.
+
+`BacktestReport` carries the `prices` DataFrame (daily OHLCV), a `buy_hold`
+result, and a `strategies` mapping. Each `StrategyResult` carries the equity
+curve, daily returns, drawdown series, buy/sell `signals`, the `indicators`
+to overlay on the price chart, the `trades` log, and a `Metrics` dict (Total
+Return, CAGR, Volatility, Sharpe, Sortino, Maximum Drawdown, Win Rate).
+
+The frontend only ever reads these objects, so as long as the backend returns
+the same shapes, no frontend code changes.
 
 ## Strategies
 
