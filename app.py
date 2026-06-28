@@ -10,20 +10,8 @@ from frontend.charts import (
 from frontend.styles import inject_styles
 from frontend.validation import normalize_ticker
 
-# --------------------------------------------------------------------------- #
-# BACKEND INTEGRATION POINT                                                     #
-# --------------------------------------------------------------------------- #
-# The frontend is currently driven by synthetic data so it can be built and    #
-# demoed without the backend. When the backend module `backtest_service.py`     #
-# is ready (a class implementing the BacktestService contract in contract.py),  #
-# swap the import below for:                                                     #
-#                                                                               #
-#     from backtest_service import AlpacaBacktestService as BacktestService     #
-#                                                                               #
-# Nothing else in this file needs to change -- both services return the same    #
-# BacktestReport objects. See README "Backend integration contract".            #
-# --------------------------------------------------------------------------- #
-from frontend.mock_backtest import MockBacktestService as BacktestService
+from backtest_service import AlpacaBacktestService as BacktestService
+from frontend.mock_backtest import MockBacktestService
 
 YEARS = 5
 
@@ -41,9 +29,19 @@ def get_service() -> BacktestService:
     return BacktestService()
 
 
+@st.cache_resource
+def get_mock_service() -> MockBacktestService:
+    return MockBacktestService()
+
+
 @st.cache_data(ttl=600, show_spinner=False)
 def run_backtest(symbol: str, years: int) -> BacktestReport:
     return get_service().run_backtest(symbol, years)
+
+
+@st.cache_data(ttl=600, show_spinner=False)
+def run_mock_backtest(symbol: str, years: int) -> BacktestReport:
+    return get_mock_service().run_backtest(symbol, years)
 
 
 def _pct(value: float) -> str:
@@ -137,7 +135,14 @@ if run_clicked:
         st.error(str(error))
     st.session_state.strategy = strategy_choice
 
-report = run_backtest(st.session_state.symbol, YEARS)
+try:
+    report = run_backtest(st.session_state.symbol, YEARS)
+except Exception as error:
+    st.warning(
+        "Alpaca backend is not available, so the dashboard is showing synthetic "
+        f"demo data. Backend detail: {error}"
+    )
+    report = run_mock_backtest(st.session_state.symbol, YEARS)
 
 source_note = "Synthetic data / mock backend" if report.using_mock else "Live Alpaca data"
 st.markdown(

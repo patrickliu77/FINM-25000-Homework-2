@@ -1,0 +1,165 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [5 0 R 7 0 R] /Count 2 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>
+endobj
+4 0 obj
+<< /Length 2272 >>
+stream
+BT
+/F1 10 Tf
+50 750 Td
+14 TL
+(FINM 25000 Homework 2: Technical Indicators & Strategy Backtesting) Tj
+T*
+() Tj
+T*
+(Ticker: AAPL) Tj
+T*
+(Period: 5 years of daily OHLCV bars) Tj
+T*
+(Data source: Synthetic mock data) Tj
+T*
+(Initial capital: $100,000) Tj
+T*
+(Constraints: long-only, no leverage, no short selling) Tj
+T*
+() Tj
+T*
+(Artifact note:) Tj
+T*
+(These artifacts were generated in mock mode because Alpaca credentials) Tj
+T*
+(were not available in this local repo at generation time.) Tj
+T*
+(Backend detail: Missing Alpaca credentials. Copy .env.example to .env and set) Tj
+T*
+(ALPACA_API_KEY and ALPACA_SECRET_KEY.) Tj
+T*
+() Tj
+T*
+(Strategy Descriptions) Tj
+T*
+() Tj
+T*
+(Buy & Hold: fully invested benchmark used as the baseline comparison.) Tj
+T*
+() Tj
+T*
+(Trend Following: buys when MACD is above its signal line, ADX is above) Tj
+T*
+(25, and price is above the 50-day SMA. It exits when MACD crosses below) Tj
+T*
+(its signal or price loses the 50-day SMA.) Tj
+T*
+() Tj
+T*
+(Mean Reversion: buys oversold conditions where RSI is below 30 and price) Tj
+T*
+(is below the lower Bollinger Band. It exits when RSI is above 70 or price) Tj
+T*
+(moves above the upper Bollinger Band.) Tj
+T*
+() Tj
+T*
+(Custom Strategy: combines trend, momentum, volatility, and volume. It) Tj
+T*
+(requires EMA20 > SMA50, MACD > signal, RSI between 45 and 70, price above) Tj
+T*
+(the Bollinger midline, positive CMF, and a normal ATR regime. It exits on) Tj
+T*
+(trend, momentum, or volume deterioration.) Tj
+T*
+() Tj
+T*
+(Performance Comparison) Tj
+T*
+() Tj
+T*
+(Strategy                 Total Return   CAGR   Volatility   Sharpe   Sortino   Max DD) Tj
+T*
+(Win Rate) Tj
+T*
+(Buy & Hold                     26.0%    4.7%       21.3%     0.32      0.55   -38.3%) Tj
+T*
+(100.0%) Tj
+T*
+(Trend Following                13.2%    2.5%       12.3%     0.26      0.26   -16.6%) Tj
+T*
+(34.9%) Tj
+T*
+(Mean Reversion                 73.0%   11.6%       14.7%     0.82      0.97   -21.8%) Tj
+T*
+(70.0%) Tj
+T*
+(Custom                          6.6%    1.3%       13.2%     0.16      0.17   -19.7%) Tj
+T*
+(31.6%) Tj
+T*
+() Tj
+T*
+(Discussion) Tj
+T*
+() Tj
+T*
+(The highest Sharpe ratio in this run belongs to Mean Reversion. The key) Tj
+T*
+(comparison is risk-adjusted performance, not just raw return, so the) Tj
+T*
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 4 0 R >>
+endobj
+6 0 obj
+<< /Length 393 >>
+stream
+BT
+/F1 10 Tf
+50 750 Td
+14 TL
+(equity curve and drawdown chart should be reviewed together with the) Tj
+T*
+(Sharpe, Sortino, and maximum drawdown metrics.) Tj
+T*
+() Tj
+T*
+(Charts) Tj
+T*
+() Tj
+T*
+(The repository includes HTML chart exports in the charts/ folder:) Tj
+T*
+(- price chart with indicators and buy/sell signals) Tj
+T*
+(- equity curve comparison) Tj
+T*
+(- drawdown comparison) Tj
+T*
+ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents 6 0 R >>
+endobj
+xref
+0 8
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000121 00000 n 
+0000000189 00000 n 
+0000002513 00000 n 
+0000002639 00000 n 
+0000003083 00000 n 
+trailer
+<< /Size 8 /Root 1 0 R >>
+startxref
+3209
+%%EOF

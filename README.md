@@ -1,73 +1,96 @@
 # FINM 25000 Homework 2: Strategy Backtesting Terminal
 
-A Python and Streamlit application that downloads five years of daily OHLCV
-data from Alpaca, computes a shelf of technical indicators, backtests several
-algorithmic trading strategies, and compares them on a risk-adjusted basis.
+Streamlit app and backend engine for testing technical-indicator trading
+strategies with Alpaca historical market data.
 
-## Current status
+## What It Does
 
-The Streamlit frontend is complete and runs end to end on a synthetic mock
-service (`frontend/mock_backtest.py`) so the interface, charts, metric cards,
-and comparison table can be built and demoed without the backend. Everything
-shown is mock data for now.
+- Authenticates to Alpaca's paper-trading API.
+- Downloads 5 years of daily OHLCV bars for a user-selected ticker.
+- Computes technical indicators across trend, momentum, volatility, and volume.
+- Backtests Buy & Hold, Trend Following, Mean Reversion, and Custom strategies.
+- Calculates Total Return, CAGR, Volatility, Sharpe, Sortino, Max Drawdown, and Win Rate.
+- Displays price/signals, equity curves, drawdowns, and a comparison table.
 
-Integration is a one-line import swap: when the backend module
-`backtest_service.py` is ready (a class implementing the `BacktestService`
-contract in `contract.py`), change the marked import in `app.py` and the same
-UI renders live Alpaca results. Look for `BACKEND INTEGRATION POINT` in
-`app.py`.
-
-## Project structure
-
-```
-app.py                     Streamlit entry point and page orchestration
-contract.py                Frontend <-> backend contract (shared data types)
-frontend/mock_backtest.py  Synthetic BacktestService used until the backend lands
-frontend/charts.py         Price, equity-curve, and drawdown chart builders
-frontend/styles.py         Visual system (CSS) for the terminal interface
-frontend/validation.py     Ticker input validation
-.streamlit/config.toml     Local server configuration (port 8512)
-requirements.txt           Python dependencies
-backtest_service.py        Real Alpaca-backed service (added by the backend author)
-```
-
-## Run the frontend
+## Setup
 
 ```bash
 python -m venv .venv
-.venv\Scripts\activate         # Windows  (use: source .venv/bin/activate on macOS/Linux)
+source .venv/bin/activate
 pip install -r requirements.txt
+cp .env.example .env
+```
+
+Add your Alpaca paper credentials to `.env`:
+
+```bash
+ALPACA_API_KEY=your_key_here
+ALPACA_SECRET_KEY=your_secret_here
+```
+
+`.env` is ignored by Git and should not be committed.
+
+## Run
+
+```bash
 streamlit run app.py
 ```
 
-The project is configured to open at `http://localhost:8512`.
+The app opens at `http://localhost:8512`.
 
-## Backend integration contract
+If credentials are missing, the dashboard falls back to clearly labeled
+synthetic demo data so the UI can still be reviewed. With `.env` configured, it
+uses the real Alpaca backend.
 
-Defined in `contract.py`. The backend ships a class implementing
-`BacktestService`:
+## Generate Charts And PDF Report
 
-- `available_strategies() -> list[str]` -- strategy display names.
-- `run_backtest(symbol, years=5) -> BacktestReport` -- loads history, runs
-  Buy & Hold plus every strategy, and scores them.
+For final Alpaca-based artifacts:
 
-`BacktestReport` carries the `prices` DataFrame (daily OHLCV), a `buy_hold`
-result, and a `strategies` mapping. Each `StrategyResult` carries the equity
-curve, daily returns, drawdown series, buy/sell `signals`, the `indicators`
-to overlay on the price chart, the `trades` log, and a `Metrics` dict (Total
-Return, CAGR, Volatility, Sharpe, Sortino, Maximum Drawdown, Win Rate).
+```bash
+python generate_submission_artifacts.py --symbol AAPL
+```
 
-The frontend only ever reads these objects, so as long as the backend returns
-the same shapes, no frontend code changes.
+For structure/testing without credentials:
+
+```bash
+python generate_submission_artifacts.py --symbol AAPL --allow-mock
+```
+
+This writes:
+
+- `charts/aapl_trend_price_signals.html`
+- `charts/aapl_equity_curves.html`
+- `charts/aapl_drawdowns.html`
+- `reports/final_report.pdf`
+
+## Project Structure
+
+```text
+app.py                              Streamlit dashboard
+backtest_service.py                 Production service satisfying contract.py
+data_loader.py                      Alpaca auth and historical OHLCV retrieval
+indicators.py                       SMA, EMA, MACD, ADX, RSI, Bollinger, ATR, OBV, CMF, etc.
+strategies.py                       Trend, mean-reversion, and custom signal rules
+backtester.py                       Long-only reusable backtest engine and metrics
+generate_submission_artifacts.py    Chart/PDF artifact generator
+contract.py                         Frontend/backend dataclasses and protocol
+frontend/                           UI charts, styling, validation, mock service
+tests/                              Unit tests for backend logic and Alpaca auth wiring
+charts/                             Exported chart files
+reports/final_report.pdf            Final report PDF
+```
 
 ## Strategies
 
-- **Trend Following** -- MACD, ADX, and moving averages.
-- **Mean Reversion** -- RSI and Bollinger Bands.
-- **Custom** -- combines at least three indicators across two or more
-  categories (trend, momentum, volatility, volume).
+- **Trend Following**: buy when MACD > signal, ADX > 25, and price > SMA50;
+  sell when MACD < signal or price < SMA50.
+- **Mean Reversion**: buy when RSI < 30 and price is below the lower Bollinger
+  Band; sell when RSI > 70 or price is above the upper Bollinger Band.
+- **Custom**: combines EMA/SMA trend, MACD, RSI, Bollinger midline, ATR regime,
+  and Chaikin Money Flow.
 
-## Credentials
+## Tests
 
-Copy `.env.example` to `.env` and add Alpaca paper API credentials locally.
-The `.env` file is ignored by Git and must never be committed.
+```bash
+python -m unittest discover -s tests -v
+```
